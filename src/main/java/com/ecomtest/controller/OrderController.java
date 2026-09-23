@@ -2,13 +2,16 @@ package com.ecomtest.controller;
 
 import com.ecomtest.dto.OrderRequest;
 import com.ecomtest.dto.OrderResponse;
+import com.ecomtest.dto.OrderStatusUpdateRequest;
 import com.ecomtest.entity.Order;
 import com.ecomtest.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,27 +31,38 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody OrderRequest request) {
         Order order = orderService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(OrderResponse.from(order));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public OrderResponse get(@PathVariable Long id) {
         return OrderResponse.from(orderService.get(id));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping
     public List<OrderResponse> list() {
         return orderService.list().stream().map(OrderResponse::from).toList();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public OrderResponse update(@PathVariable Long id, @Valid @RequestBody OrderRequest request) {
         return OrderResponse.from(orderService.update(id, request));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PatchMapping("/{id}/status")
+    public OrderResponse updateStatus(@PathVariable Long id, @Valid @RequestBody OrderStatusUpdateRequest request) {
+        return OrderResponse.from(orderService.updateStatus(id, request.getStatus()));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         orderService.delete(id);

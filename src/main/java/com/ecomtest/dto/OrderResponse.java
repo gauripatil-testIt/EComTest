@@ -13,6 +13,9 @@ public class OrderResponse {
     private Integer quantity;
     private BigDecimal unitPrice;
     private OrderStatus status;
+    private Long createdByUserId;
+    private String createdBy;
+    private String modifiedBy;
 
     public static OrderResponse from(Order order) {
         OrderResponse response = new OrderResponse();
@@ -22,6 +25,9 @@ public class OrderResponse {
         response.quantity = order.getQuantity();
         response.unitPrice = order.getUnitPrice();
         response.status = order.getStatus();
+        response.createdByUserId = order.getCreatedByUserId();
+        response.createdBy = order.getCreatedBy();
+        response.modifiedBy = order.getModifiedBy();
         return response;
     }
 
@@ -47,5 +53,17 @@ public class OrderResponse {
 
     public OrderStatus getStatus() {
         return status;
+    }
+
+    public Long getCreatedByUserId() {
+        return createdByUserId;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
     }
 }

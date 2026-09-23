@@ -35,6 +35,12 @@ public class Product {
     @Column(nullable = false)
     private ProductStatus status;
 
+    @Column(nullable = true)
+    private String createdBy;
+
+    @Column(nullable = true)
+    private String modifiedBy;
+
     public Long getId() {
         return id;
     }
@@ -81,5 +87,21 @@ public class Product {
 
     public void setStatus(ProductStatus status) {
         this.status = status;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 }

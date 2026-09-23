@@ -39,6 +39,15 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus status;
 
+    @Column(nullable = true)
+    private Long createdByUserId;
+
+    @Column(nullable = true)
+    private String createdBy;
+
+    @Column(nullable = true)
+    private String modifiedBy;
+
     public Long getId() {
         return id;
     }
@@ -85,5 +94,29 @@ public class Order {
 
     public void setStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    public Long getCreatedByUserId() {
+        return createdByUserId;
+    }
+
+    public void setCreatedByUserId(Long createdByUserId) {
+        this.createdByUserId = createdByUserId;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 }

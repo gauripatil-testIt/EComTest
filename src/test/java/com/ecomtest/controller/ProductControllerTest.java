@@ -28,6 +28,7 @@ class ProductControllerTest {
                   "sku": "%s",
                   "price": 19.99,
                   "stock": 100,
+                  "description": "A reliable wireless mouse with ergonomic design.",
                   "status": "ACTIVE"
                 }
                 """.formatted(sku);
@@ -74,6 +75,7 @@ class ProductControllerTest {
                   "sku": "SKU-UPDATE-1",
                   "price": 24.99,
                   "stock": 50,
+                  "description": "An upgraded wireless mouse with extra buttons.",
                   "status": "ACTIVE"
                 }
                 """;

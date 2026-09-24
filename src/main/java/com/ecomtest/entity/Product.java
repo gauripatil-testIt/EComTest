@@ -31,6 +31,9 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
+    @Column(nullable = false, length = 2000)
+    private String description;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductStatus status;
@@ -81,5 +84,13 @@ public class Product {
 
     public void setStatus(ProductStatus status) {
         this.status = status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

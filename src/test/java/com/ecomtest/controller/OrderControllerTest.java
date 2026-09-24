@@ -28,6 +28,7 @@ class OrderControllerTest {
                   "sku": "%s",
                   "price": 19.99,
                   "stock": 100,
+                  "description": "A reliable wireless mouse with ergonomic design.",
                   "status": "ACTIVE"
                 }
                 """.formatted(sku);

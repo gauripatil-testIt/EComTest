@@ -4,6 +4,7 @@ import com.ecomtest.entity.ProductStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
@@ -22,6 +23,10 @@ public class ProductRequest {
     @NotNull
     @PositiveOrZero
     private Integer stock;
+
+    @NotBlank
+    @Size(max = 2000)
+    private String description;
 
     @NotNull
     private ProductStatus status;
@@ -64,5 +69,13 @@ public class ProductRequest {
 
     public void setStatus(ProductStatus status) {
         this.status = status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

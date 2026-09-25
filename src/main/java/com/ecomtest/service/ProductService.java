@@ -46,9 +46,9 @@ public class ProductService {
     private void applyRequest(Product product, ProductRequest request) {
         product.setName(request.getName());
         product.setSku(request.getSku());
+        product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setStock(request.getStock());
-        product.setDescription(request.getDescription());
         product.setStatus(request.getStatus());
     }
 }

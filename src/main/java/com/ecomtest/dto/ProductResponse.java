@@ -10,19 +10,23 @@ public class ProductResponse {
     private Long id;
     private String name;
     private String sku;
+    private String description;
     private BigDecimal price;
     private Integer stock;
-    private String description;
     private ProductStatus status;
+    private String nameHighlight;
+    private String skuHighlight;
+    private String descriptionHighlight;
+    private Double relevanceScore;
 
     public static ProductResponse from(Product product) {
         ProductResponse response = new ProductResponse();
         response.id = product.getId();
         response.name = product.getName();
         response.sku = product.getSku();
+        response.description = product.getDescription();
         response.price = product.getPrice();
         response.stock = product.getStock();
-        response.description = product.getDescription();
         response.status = product.getStatus();
         return response;
     }
@@ -39,6 +43,10 @@ public class ProductResponse {
         return sku;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     public BigDecimal getPrice() {
         return price;
     }
@@ -47,11 +55,39 @@ public class ProductResponse {
         return stock;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
     public ProductStatus getStatus() {
         return status;
+    }
+
+    public String getNameHighlight() {
+        return nameHighlight;
+    }
+
+    public void setNameHighlight(String nameHighlight) {
+        this.nameHighlight = nameHighlight;
+    }
+
+    public String getSkuHighlight() {
+        return skuHighlight;
+    }
+
+    public void setSkuHighlight(String skuHighlight) {
+        this.skuHighlight = skuHighlight;
+    }
+
+    public String getDescriptionHighlight() {
+        return descriptionHighlight;
+    }
+
+    public void setDescriptionHighlight(String descriptionHighlight) {
+        this.descriptionHighlight = descriptionHighlight;
+    }
+
+    public Double getRelevanceScore() {
+        return relevanceScore;
+    }
+
+    public void setRelevanceScore(Double relevanceScore) {
+        this.relevanceScore = relevanceScore;
     }
 }

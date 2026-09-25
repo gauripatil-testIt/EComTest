@@ -1,10 +1,12 @@
 package com.ecomtest.controller;
 
+import com.ecomtest.TestcontainersConfiguration;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -13,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(TestcontainersConfiguration.class)
 class OrderControllerTest {
 
     @Autowired
@@ -28,7 +31,6 @@ class OrderControllerTest {
                   "sku": "%s",
                   "price": 19.99,
                   "stock": 100,
-                  "description": "A reliable wireless mouse with ergonomic design.",
                   "status": "ACTIVE"
                 }
                 """.formatted(sku);

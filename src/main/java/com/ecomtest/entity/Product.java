@@ -25,14 +25,14 @@ public class Product {
     @Column(nullable = false, unique = true)
     private String sku;
 
+    @Column
+    private String description;
+
     @Column(nullable = false)
     private BigDecimal price;
 
     @Column(nullable = false)
     private Integer stock;
-
-    @Column(nullable = false, length = 2000)
-    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -62,6 +62,14 @@ public class Product {
         this.sku = sku;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public BigDecimal getPrice() {
         return price;
     }
@@ -84,13 +92,5 @@ public class Product {
 
     public void setStatus(ProductStatus status) {
         this.status = status;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 }

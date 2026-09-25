@@ -50,6 +50,17 @@ public class ProductController {
         return productService.list().stream().map(ProductResponse::from).toList();
     }
 
+    @GetMapping("/search")
+    public ProductPageResponse search(@RequestParam(required = false) String q,
+                                       @RequestParam(required = false) ProductStatus status,
+                                       @RequestParam(required = false) BigDecimal minPrice,
+                                       @RequestParam(required = false) BigDecimal maxPrice,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productService.search(q, status, minPrice, maxPrice, pageable);
+    }
+
     @PutMapping("/{id}")
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
         return ProductResponse.from(productService.update(id, request));

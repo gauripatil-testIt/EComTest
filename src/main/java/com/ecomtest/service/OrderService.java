@@ -2,6 +2,7 @@ package com.ecomtest.service;
 
 import com.ecomtest.dto.OrderRequest;
 import com.ecomtest.entity.Order;
+import com.ecomtest.entity.OrderStatus;
 import com.ecomtest.entity.Product;
 import com.ecomtest.exception.ResourceNotFoundException;
 import com.ecomtest.repository.OrderRepository;
@@ -32,8 +33,11 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + id));
     }
 
-    public List<Order> list() {
-        return orderRepository.findAll();
+    public List<Order> list(OrderStatus status) {
+        if (status == null) {
+            return orderRepository.findAll();
+        }
+        return orderRepository.findByStatus(status);
     }
 
     public Order update(Long id, OrderRequest request) {

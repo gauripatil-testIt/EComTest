@@ -3,6 +3,7 @@ package com.ecomtest.controller;
 import com.ecomtest.dto.OrderRequest;
 import com.ecomtest.dto.OrderResponse;
 import com.ecomtest.entity.Order;
+import com.ecomtest.entity.OrderStatus;
 import com.ecomtest.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -40,8 +42,8 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<OrderResponse> list() {
-        return orderService.list().stream().map(OrderResponse::from).toList();
+    public List<OrderResponse> list(@RequestParam(required = false) OrderStatus status) {
+        return orderService.list(status).stream().map(OrderResponse::from).toList();
     }
 
     @PutMapping("/{id}")

@@ -81,7 +81,96 @@ class OrderControllerTest {
 
         mockMvc.perform(get("/api/orders"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.totalElements").isNumber())
+                .andExpect(jsonPath("$.totalPages").isNumber());
+    }
+
+    @Test
+    void paginatesOrders() throws Exception {
+        Long productId = createProduct("SKU-ORD-PAGE-1");
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(orderPayload(productId)));
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(orderPayload(productId)));
+
+        mockMvc.perform(get("/api/orders").param("page", "0").param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.size").value(1));
+    }
+
+    @Test
+    void filtersOrdersByStatusAndCustomerName() throws Exception {
+        Long productId = createProduct("SKU-ORD-FILTER-1");
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(orderPayload(productId)));
+
+        mockMvc.perform(get("/api/orders")
+                        .param("status", "PENDING")
+                        .param("customerName", "jane")
+                        .param("sort", "createdAt,desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+    }
+
+    @Test
+    void filtersOrdersByProductId() throws Exception {
+        Long productId = createProduct("SKU-ORD-PRODFILTER-1");
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(orderPayload(productId)));
+
+        mockMvc.perform(get("/api/orders").param("productId", productId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+    }
+
+    @Test
+    void filtersOrdersByDateRange() throws Exception {
+        Long productId = createProduct("SKU-ORD-DATEFILTER-1");
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(orderPayload(productId)));
+
+        mockMvc.perform(get("/api/orders").param("dateFrom", "2000-01-01T00:00:00Z"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+    }
+
+    @Test
+    void rejectsInvalidSortField() throws Exception {
+        mockMvc.perform(get("/api/orders").param("sort", "bogus"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", org.hamcrest.Matchers.containsString("Invalid sort field: bogus")));
+    }
+
+    @Test
+    void rejectsInvalidStatus() throws Exception {
+        mockMvc.perform(get("/api/orders").param("status", "NOPE"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void rejectsInvalidDateFormat() throws Exception {
+        mockMvc.perform(get("/api/orders").param("dateFrom", "not-a-date"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void returnsEmptyContentWhenNoMatches() throws Exception {
+        mockMvc.perform(get("/api/orders").param("customerName", "no-such-customer-xyz"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.empty()));
     }
 
     @Test

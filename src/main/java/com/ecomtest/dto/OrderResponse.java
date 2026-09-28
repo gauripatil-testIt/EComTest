@@ -4,6 +4,7 @@ import com.ecomtest.entity.Order;
 import com.ecomtest.entity.OrderStatus;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 public class OrderResponse {
 
@@ -13,6 +14,7 @@ public class OrderResponse {
     private Integer quantity;
     private BigDecimal unitPrice;
     private OrderStatus status;
+    private Instant createdAt;
 
     public static OrderResponse from(Order order) {
         OrderResponse response = new OrderResponse();
@@ -22,6 +24,7 @@ public class OrderResponse {
         response.quantity = order.getQuantity();
         response.unitPrice = order.getUnitPrice();
         response.status = order.getStatus();
+        response.createdAt = order.getCreatedAt();
         return response;
     }
 
@@ -47,5 +50,9 @@ public class OrderResponse {
 
     public OrderStatus getStatus() {
         return status;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 }

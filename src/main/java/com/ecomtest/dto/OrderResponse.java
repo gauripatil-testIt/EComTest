@@ -13,6 +13,8 @@ public class OrderResponse {
     private Integer quantity;
     private BigDecimal unitPrice;
     private OrderStatus status;
+    private String customerEmail;
+    private String trackingNumber;
 
     public static OrderResponse from(Order order) {
         OrderResponse response = new OrderResponse();
@@ -22,6 +24,8 @@ public class OrderResponse {
         response.quantity = order.getQuantity();
         response.unitPrice = order.getUnitPrice();
         response.status = order.getStatus();
+        response.customerEmail = order.getCustomerEmail();
+        response.trackingNumber = order.getTrackingNumber();
         return response;
     }
 
@@ -47,5 +51,13 @@ public class OrderResponse {
 
     public OrderStatus getStatus() {
         return status;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public String getTrackingNumber() {
+        return trackingNumber;
     }
 }

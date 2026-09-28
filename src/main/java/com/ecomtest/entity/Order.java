@@ -39,6 +39,12 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus status;
 
+    @Column(nullable = true)
+    private String customerEmail;
+
+    @Column(nullable = true)
+    private String trackingNumber;
+
     public Long getId() {
         return id;
     }
@@ -85,5 +91,21 @@ public class Order {
 
     public void setStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
+    }
+
+    public String getTrackingNumber() {
+        return trackingNumber;
+    }
+
+    public void setTrackingNumber(String trackingNumber) {
+        this.trackingNumber = trackingNumber;
     }
 }

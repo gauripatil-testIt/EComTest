@@ -6,6 +6,8 @@ import com.ecomtest.entity.Product;
 import com.ecomtest.exception.ResourceNotFoundException;
 import com.ecomtest.repository.OrderRepository;
 import com.ecomtest.repository.ProductRepository;
+import com.ecomtest.repository.UserRepository;
+import com.ecomtest.entity.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,10 +17,12 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
-    public OrderService(OrderRepository orderRepository, ProductRepository productRepository) {
+    public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
     }
 
     public Order create(OrderRequest request) {
@@ -28,17 +32,46 @@ public class OrderService {
     }
 
     public Order get(Long id) {
-        return orderRepository.findById(id)
+        Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + id));
+
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        User actingUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+
+        if (actingUser.getRole() == com.ecomtest.entity.Role.CUSTOMER && order.getCreatedBy() != null && !order.getCreatedBy().getId().equals(actingUser.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Access denied");
+        }
+
+        return order;
     }
 
     public List<Order> list() {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        User actingUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+
+        if (actingUser.getRole() == com.ecomtest.entity.Role.CUSTOMER) {
+            return orderRepository.findAllByCreatedBy(actingUser);
+        }
+
         return orderRepository.findAll();
     }
 
     public Order update(Long id, OrderRequest request) {
         Order order = get(id);
-        applyRequest(order, request);
+
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        User actingUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+
+        if (actingUser.getRole() == com.ecomtest.entity.Role.STAFF) {
+            order.setStatus(request.getStatus());
+        } else {
+            applyRequest(order, request);
+        }
+
+        order.setModifiedBy(actingUser);
         return orderRepository.save(order);
     }
 
@@ -55,5 +88,14 @@ public class OrderService {
         order.setQuantity(request.getQuantity());
         order.setUnitPrice(request.getUnitPrice());
         order.setStatus(request.getStatus());
+
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        User actingUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+
+        if (order.getId() == null) {
+            order.setCreatedBy(actingUser);
+        }
+        order.setModifiedBy(actingUser);
     }
 }

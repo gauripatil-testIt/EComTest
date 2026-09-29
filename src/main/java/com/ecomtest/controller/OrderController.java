@@ -18,37 +18,46 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
-
+ 
     private final OrderService orderService;
+
+    // ADMIN: full CRUD; STAFF: status update only; CUSTOMER: create/get/list own only
 
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','CUSTOMER')")
     @PostMapping
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody OrderRequest request) {
         Order order = orderService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(OrderResponse.from(order));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF','CUSTOMER')")
     @GetMapping("/{id}")
     public OrderResponse get(@PathVariable Long id) {
         return OrderResponse.from(orderService.get(id));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF','CUSTOMER')")
     @GetMapping
     public List<OrderResponse> list() {
         return orderService.list().stream().map(OrderResponse::from).toList();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     @PutMapping("/{id}")
     public OrderResponse update(@PathVariable Long id, @Valid @RequestBody OrderRequest request) {
         return OrderResponse.from(orderService.update(id, request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         orderService.delete(id);

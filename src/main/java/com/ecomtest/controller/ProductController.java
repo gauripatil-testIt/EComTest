@@ -18,37 +18,46 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
-
+ 
     private final ProductService productService;
+
+    // ADMIN: full CRUD; STAFF/CUSTOMER: read/list only
 
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
         Product product = productService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ProductResponse.from(product));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF','CUSTOMER')")
     @GetMapping("/{id}")
     public ProductResponse get(@PathVariable Long id) {
         return ProductResponse.from(productService.get(id));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF','CUSTOMER')")
     @GetMapping
     public List<ProductResponse> list() {
         return productService.list().stream().map(ProductResponse::from).toList();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
         return ProductResponse.from(productService.update(id, request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.delete(id);

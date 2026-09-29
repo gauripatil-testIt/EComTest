@@ -1,6 +1,7 @@
 package com.ecomtest.controller;
 
 import tools.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -10,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -20,6 +22,22 @@ class OrderControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    private String adminToken;
+
+    @BeforeEach
+    void setup() throws Exception {
+        String response = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"admin\",\"password\":\"admin\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        adminToken = objectMapper.readTree(response).get("token").asText();
+    }
+
+    private String auth(String token) {
+        return "Bearer " + token;
+    }
 
     private String productPayload(String sku) {
         return """
@@ -35,6 +53,7 @@ class OrderControllerTest {
 
     private Long createProduct(String sku) throws Exception {
         String response = mockMvc.perform(post("/api/products")
+                        .header("Authorization", auth(adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(productPayload(sku)))
                 .andReturn().getResponse().getContentAsString();
@@ -58,6 +77,7 @@ class OrderControllerTest {
         Long productId = createProduct("SKU-ORD-CREATE-1");
 
         String response = mockMvc.perform(post("/api/orders")
+                        .header("Authorization", auth(adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(orderPayload(productId)))
                 .andExpect(status().isCreated())
@@ -66,7 +86,8 @@ class OrderControllerTest {
 
         Long id = objectMapper.readTree(response).get("id").asLong();
 
-        mockMvc.perform(get("/api/orders/{id}", id))
+        mockMvc.perform(get("/api/orders/{id}", id)
+                        .header("Authorization", auth(adminToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.customerName").value("Jane Doe"));
     }
@@ -76,10 +97,12 @@ class OrderControllerTest {
         Long productId = createProduct("SKU-ORD-LIST-1");
 
         mockMvc.perform(post("/api/orders")
+                        .header("Authorization", auth(adminToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(orderPayload(productId)));
 
-        mockMvc.perform(get("/api/orders"))
+        mockMvc.perform(get("/api/orders")
+                        .header("Authorization", auth(adminToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
     }
@@ -89,6 +112,7 @@ class OrderControllerTest {
         Long productId = createProduct("SKU-ORD-UPDATE-1");
 
         String created = mockMvc.perform(post("/api/orders")
+                        .header("Authorization", auth(adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(orderPayload(productId)))
                 .andReturn().getResponse().getContentAsString();
@@ -105,6 +129,7 @@ class OrderControllerTest {
                 """.formatted(productId);
 
         mockMvc.perform(put("/api/orders/{id}", id)
+                        .header("Authorization", auth(adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedPayload))
                 .andExpect(status().isOk())
@@ -117,21 +142,25 @@ class OrderControllerTest {
         Long productId = createProduct("SKU-ORD-DELETE-1");
 
         String created = mockMvc.perform(post("/api/orders")
+                        .header("Authorization", auth(adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(orderPayload(productId)))
                 .andReturn().getResponse().getContentAsString();
         Long id = objectMapper.readTree(created).get("id").asLong();
 
-        mockMvc.perform(delete("/api/orders/{id}", id))
+        mockMvc.perform(delete("/api/orders/{id}", id)
+                        .header("Authorization", auth(adminToken)))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/orders/{id}", id))
+        mockMvc.perform(get("/api/orders/{id}", id)
+                        .header("Authorization", auth(adminToken)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void rejectsOrderWithUnknownProduct() throws Exception {
         mockMvc.perform(post("/api/orders")
+                        .header("Authorization", auth(adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(orderPayload(999999L)))
                 .andExpect(status().isNotFound());

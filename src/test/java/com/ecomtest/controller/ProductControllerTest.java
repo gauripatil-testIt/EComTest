@@ -1,6 +1,7 @@
 package com.ecomtest.controller;
 
 import tools.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -21,6 +22,22 @@ class ProductControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private String adminToken;
+
+    @BeforeEach
+    void setup() throws Exception {
+        String response = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"admin\",\"password\":\"admin\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        adminToken = objectMapper.readTree(response).get("token").asText();
+    }
+
+    private String auth(String token) {
+        return "Bearer " + token;
+    }
+
     private String productPayload(String sku) {
         return """
                 {
@@ -36,6 +53,7 @@ class ProductControllerTest {
     @Test
     void createsAndFetchesProduct() throws Exception {
         String response = mockMvc.perform(post("/api/products")
+                        .header("Authorization", auth(adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(productPayload("SKU-CREATE-1")))
                 .andExpect(status().isCreated())
@@ -44,7 +62,8 @@ class ProductControllerTest {
 
         Long id = objectMapper.readTree(response).get("id").asLong();
 
-        mockMvc.perform(get("/api/products/{id}", id))
+        mockMvc.perform(get("/api/products/{id}", id)
+                        .header("Authorization", auth(adminToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Wireless Mouse"));
     }
@@ -52,10 +71,12 @@ class ProductControllerTest {
     @Test
     void listsProducts() throws Exception {
         mockMvc.perform(post("/api/products")
+                        .header("Authorization", auth(adminToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(productPayload("SKU-LIST-1")));
 
-        mockMvc.perform(get("/api/products"))
+        mockMvc.perform(get("/api/products")
+                        .header("Authorization", auth(adminToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
     }
@@ -63,6 +84,7 @@ class ProductControllerTest {
     @Test
     void updatesProduct() throws Exception {
         String created = mockMvc.perform(post("/api/products")
+                        .header("Authorization", auth(adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(productPayload("SKU-UPDATE-1")))
                 .andReturn().getResponse().getContentAsString();
@@ -79,6 +101,7 @@ class ProductControllerTest {
                 """;
 
         mockMvc.perform(put("/api/products/{id}", id)
+                        .header("Authorization", auth(adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedPayload))
                 .andExpect(status().isOk())
@@ -89,15 +112,18 @@ class ProductControllerTest {
     @Test
     void deletesProduct() throws Exception {
         String created = mockMvc.perform(post("/api/products")
+                        .header("Authorization", auth(adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(productPayload("SKU-DELETE-1")))
                 .andReturn().getResponse().getContentAsString();
         Long id = objectMapper.readTree(created).get("id").asLong();
 
-        mockMvc.perform(delete("/api/products/{id}", id))
+        mockMvc.perform(delete("/api/products/{id}", id)
+                        .header("Authorization", auth(adminToken)))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/products/{id}", id))
+        mockMvc.perform(get("/api/products/{id}", id)
+                        .header("Authorization", auth(adminToken)))
                 .andExpect(status().isNotFound());
     }
 }

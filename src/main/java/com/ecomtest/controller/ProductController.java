@@ -1,8 +1,10 @@
 package com.ecomtest.controller;
 
+import com.ecomtest.dto.ProductImageResponse;
 import com.ecomtest.dto.ProductRequest;
 import com.ecomtest.dto.ProductResponse;
 import com.ecomtest.entity.Product;
+import com.ecomtest.service.ProductImageService;
 import com.ecomtest.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,30 +25,39 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductImageService productImageService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ProductImageService productImageService) {
         this.productService = productService;
+        this.productImageService = productImageService;
     }
 
     @PostMapping
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
         Product product = productService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ProductResponse.from(product));
+        List<ProductImageResponse> images = productImageService.listImages(product.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(ProductResponse.from(product, images));
     }
 
     @GetMapping("/{id}")
     public ProductResponse get(@PathVariable Long id) {
-        return ProductResponse.from(productService.get(id));
+        Product product = productService.get(id);
+        List<ProductImageResponse> images = productImageService.listImages(product.getId());
+        return ProductResponse.from(product, images);
     }
 
     @GetMapping
     public List<ProductResponse> list() {
-        return productService.list().stream().map(ProductResponse::from).toList();
+        return productService.list().stream()
+                .map(product -> ProductResponse.from(product, productImageService.listImages(product.getId())))
+                .toList();
     }
 
     @PutMapping("/{id}")
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
-        return ProductResponse.from(productService.update(id, request));
+        Product product = productService.update(id, request);
+        List<ProductImageResponse> images = productImageService.listImages(product.getId());
+        return ProductResponse.from(product, images);
     }
 
     @DeleteMapping("/{id}")

@@ -1,0 +1,8 @@
+package com.ecomtest.exception;
+
+public class ImageTooLargeException extends RuntimeException {
+
+    public ImageTooLargeException(String message) {
+        super(message);
+    }
+}

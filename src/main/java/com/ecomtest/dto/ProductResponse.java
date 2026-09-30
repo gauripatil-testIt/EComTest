@@ -4,6 +4,8 @@ import com.ecomtest.entity.Product;
 import com.ecomtest.entity.ProductStatus;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductResponse {
 
@@ -13,8 +15,13 @@ public class ProductResponse {
     private BigDecimal price;
     private Integer stock;
     private ProductStatus status;
+    private List<ProductImageResponse> images = new ArrayList<>();
 
     public static ProductResponse from(Product product) {
+        return from(product, new ArrayList<>());
+    }
+
+    public static ProductResponse from(Product product, List<ProductImageResponse> images) {
         ProductResponse response = new ProductResponse();
         response.id = product.getId();
         response.name = product.getName();
@@ -22,6 +29,7 @@ public class ProductResponse {
         response.price = product.getPrice();
         response.stock = product.getStock();
         response.status = product.getStatus();
+        response.images = images != null ? images : new ArrayList<>();
         return response;
     }
 
@@ -47,5 +55,9 @@ public class ProductResponse {
 
     public ProductStatus getStatus() {
         return status;
+    }
+
+    public List<ProductImageResponse> getImages() {
+        return images;
     }
 }

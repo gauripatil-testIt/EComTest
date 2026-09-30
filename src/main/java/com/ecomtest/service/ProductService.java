@@ -12,9 +12,11 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductImageService productImageService;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, ProductImageService productImageService) {
         this.productRepository = productRepository;
+        this.productImageService = productImageService;
     }
 
     public Product create(ProductRequest request) {
@@ -40,6 +42,7 @@ public class ProductService {
 
     public void delete(Long id) {
         Product product = get(id);
+        productImageService.deleteAllImages(id);
         productRepository.delete(product);
     }
 
@@ -51,3 +54,4 @@ public class ProductService {
         product.setStatus(request.getStatus());
     }
 }
+

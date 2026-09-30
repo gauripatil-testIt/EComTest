@@ -1,0 +1,11 @@
+Your order has been cancelled, [(${customerName})].
+
+Order [(${orderId})] has been CANCELLED.
+
+Order ID: [(${orderId})]
+Product: [(${productName})]
+Quantity: [(${quantity})]
+Unit Price: [(${unitPrice})]
+Total: [(${total})]
+
+If you believe this is a mistake, please contact support.

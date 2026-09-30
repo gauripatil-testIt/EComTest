@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Order Confirmation</title>
+</head>
+<body>
+    <h1>Thanks for your order, <span th:text="${customerName}">Customer</span>!</h1>
+    <p>Your order has been received and is <strong>pending</strong>.</p>
+    <table>
+        <tr><td>Order ID:</td><td th:text="${orderId}">1</td></tr>
+        <tr><td>Product:</td><td th:text="${productName}">Product</td></tr>
+        <tr><td>Quantity:</td><td th:text="${quantity}">1</td></tr>
+        <tr><td>Unit Price:</td><td th:text="${unitPrice}">0.00</td></tr>
+        <tr><td>Total:</td><td th:text="${total}">0.00</td></tr>
+    </table>
+    <p>We'll let you know as soon as your order status changes.</p>
+</body>
+</html>

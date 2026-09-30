@@ -1,0 +1,9 @@
+Your order has arrived, [(${customerName})]!
+
+Order [(${orderId})] has been DELIVERED. We hope you enjoy it!
+
+Order ID: [(${orderId})]
+Product: [(${productName})]
+Quantity: [(${quantity})]
+Unit Price: [(${unitPrice})]
+Total: [(${total})]

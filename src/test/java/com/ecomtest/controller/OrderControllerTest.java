@@ -48,7 +48,8 @@ class OrderControllerTest {
                   "productId": %d,
                   "quantity": 2,
                   "unitPrice": 19.99,
-                  "status": "PENDING"
+                  "status": "PENDING",
+                  "customerEmail": "jane.doe@example.com"
                 }
                 """.formatted(productId);
     }
@@ -100,7 +101,8 @@ class OrderControllerTest {
                   "productId": %d,
                   "quantity": 5,
                   "unitPrice": 19.99,
-                  "status": "CONFIRMED"
+                  "status": "CONFIRMED",
+                  "customerEmail": "jane.doe@example.com"
                 }
                 """.formatted(productId);
 

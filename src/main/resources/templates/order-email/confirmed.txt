@@ -1,0 +1,9 @@
+Your order is confirmed, [(${customerName})]!
+
+Order [(${orderId})] has been CONFIRMED and is being prepared.
+
+Order ID: [(${orderId})]
+Product: [(${productName})]
+Quantity: [(${quantity})]
+Unit Price: [(${unitPrice})]
+Total: [(${total})]

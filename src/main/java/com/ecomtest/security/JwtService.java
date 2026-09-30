@@ -8,8 +8,11 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class JwtService {
@@ -23,12 +26,12 @@ public class JwtService {
         this.expirationMs = expirationMs;
     }
 
-    public String generateToken(String username, String role) {
+    public String generateToken(String username, Set<String> roles) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
         return Jwts.builder()
                 .subject(username)
-                .claims(Map.of("role", role))
+                .claims(Map.of("roles", new ArrayList<>(roles)))
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(signingKey)
@@ -39,8 +42,13 @@ public class JwtService {
         return parseClaims(token).getSubject();
     }
 
-    public String extractRole(String token) {
-        return parseClaims(token).get("role", String.class);
+    @SuppressWarnings("unchecked")
+    public List<String> extractRoles(String token) {
+        List<?> raw = parseClaims(token).get("roles", List.class);
+        if (raw == null) {
+            return List.of();
+        }
+        return (List<String>) raw.stream().map(String::valueOf).toList();
     }
 
     public boolean isTokenValid(String token) {
@@ -60,3 +68,4 @@ public class JwtService {
                 .getPayload();
     }
 }
+

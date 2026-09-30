@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -36,7 +39,11 @@ public class AuthController {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + request.getUsername()));
 
-        String token = jwtService.generateToken(user.getUsername(), user.getRole().name());
-        return new AuthResponse(token);
+        Set<String> roleNames = user.getRoles().stream()
+                .map(Enum::name)
+                .collect(Collectors.toSet());
+        String token = jwtService.generateToken(user.getUsername(), roleNames);
+        return new AuthResponse(token, "Bearer");
     }
+
 }

@@ -40,8 +40,8 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + id));
         User currentUser = currentUser();
-        if (currentUser != null && currentUser.getRole() == Role.CUSTOMER
-                && (order.getCreatedByUserId() == null || !order.getCreatedByUserId().equals(currentUser.getId()))) {
+        if (currentUser != null && currentUser.getRoles().contains(Role.CUSTOMER)
+                && (order.getCreatedBy() == null || !order.getCreatedBy().getId().equals(currentUser.getId()))) {
             throw new AccessDeniedException("Not allowed to access this order");
         }
         return order;
@@ -49,9 +49,9 @@ public class OrderService {
 
     public List<Order> list() {
         User currentUser = currentUser();
-        if (currentUser != null && currentUser.getRole() == Role.CUSTOMER) {
+        if (currentUser != null && currentUser.getRoles().contains(Role.CUSTOMER)) {
             return orderRepository.findAll().stream()
-                    .filter(order -> order.getCreatedByUserId() != null && order.getCreatedByUserId().equals(currentUser.getId()))
+                    .filter(order -> order.getCreatedBy() != null && order.getCreatedBy().getId().equals(currentUser.getId()))
                     .toList();
         }
         return orderRepository.findAll();
@@ -68,7 +68,7 @@ public class OrderService {
         order.setStatus(status);
         User currentUser = currentUser();
         if (currentUser != null) {
-            order.setModifiedBy(currentUser.getUsername());
+            order.setModifiedBy(currentUser);
         }
         return orderRepository.save(order);
     }
@@ -90,11 +90,10 @@ public class OrderService {
         User currentUser = currentUser();
         if (order.getId() == null) {
             if (currentUser != null) {
-                order.setCreatedBy(currentUser.getUsername());
-                order.setCreatedByUserId(currentUser.getId());
+                order.setCreatedBy(currentUser);
             }
         } else if (currentUser != null) {
-            order.setModifiedBy(currentUser.getUsername());
+            order.setModifiedBy(currentUser);
         }
     }
 

@@ -38,9 +38,12 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        String token = objectMapper.readTree(response).get("token").asText();
-        org.junit.jupiter.api.Assertions.assertNotNull(token);
-        org.junit.jupiter.api.Assertions.assertFalse(token.isBlank());
+        String accessToken = objectMapper.readTree(response).get("accessToken").asText();
+        org.junit.jupiter.api.Assertions.assertNotNull(accessToken);
+        org.junit.jupiter.api.Assertions.assertFalse(accessToken.isBlank());
+
+        String tokenType = objectMapper.readTree(response).get("tokenType").asText();
+        org.junit.jupiter.api.Assertions.assertEquals("Bearer", tokenType);
     }
 
     @Test

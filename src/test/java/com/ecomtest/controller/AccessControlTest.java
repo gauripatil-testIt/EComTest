@@ -36,7 +36,7 @@ class AccessControlTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andReturn().getResponse().getContentAsString();
-        return objectMapper.readTree(response).get("token").asText();
+        return objectMapper.readTree(response).get("accessToken").asText();
     }
 
     private String adminAuthHeader() throws Exception {

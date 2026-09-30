@@ -2,20 +2,30 @@ package com.ecomtest.dto;
 
 public class AuthResponse {
 
-    private String token;
+    private String accessToken;
+    private String tokenType;
 
     public AuthResponse() {
     }
 
-    public AuthResponse(String token) {
-        this.token = token;
+    public AuthResponse(String accessToken, String tokenType) {
+        this.accessToken = accessToken;
+        this.tokenType = tokenType;
     }
 
-    public String getToken() {
-        return token;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 }

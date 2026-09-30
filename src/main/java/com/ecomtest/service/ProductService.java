@@ -35,7 +35,7 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + id));
         User currentUser = currentUser();
-        if (currentUser != null && currentUser.getRole() == Role.CUSTOMER && product.getStatus() != ProductStatus.ACTIVE) {
+        if (currentUser != null && currentUser.getRoles().contains(Role.CUSTOMER) && product.getStatus() != ProductStatus.ACTIVE) {
             throw new ResourceNotFoundException("Product not found: " + id);
         }
         return product;
@@ -43,7 +43,7 @@ public class ProductService {
 
     public List<Product> list() {
         User currentUser = currentUser();
-        if (currentUser != null && currentUser.getRole() == Role.CUSTOMER) {
+        if (currentUser != null && currentUser.getRoles().contains(Role.CUSTOMER)) {
             return productRepository.findAll().stream()
                     .filter(product -> product.getStatus() == ProductStatus.ACTIVE)
                     .toList();
@@ -73,9 +73,9 @@ public class ProductService {
         User currentUser = currentUser();
         if (currentUser != null) {
             if (isCreate) {
-                product.setCreatedBy(currentUser.getUsername());
+                product.setCreatedBy(currentUser);
             } else {
-                product.setModifiedBy(currentUser.getUsername());
+                product.setModifiedBy(currentUser);
             }
         }
     }

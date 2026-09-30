@@ -115,7 +115,7 @@ public class OrderEmailService {
                 : null;
         model.put("total", total);
 
-        if (event.trackingNumber() != null) {
+        if (event.trackingNumber() != null && !event.trackingNumber().isBlank()) {
             model.put("trackingNumber", event.trackingNumber());
         }
         return model;

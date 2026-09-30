@@ -52,7 +52,7 @@ public class OrderService {
         OrderStatus previousStatus = order.getStatus();
         applyRequest(order, request);
         Order saved = orderRepository.save(order);
-        if (previousStatus != saved.getStatus()) {
+        if (previousStatus != saved.getStatus() && saved.getStatus() != OrderStatus.PENDING) {
             eventPublisher.publishEvent(toEvent(saved, previousStatus, saved.getStatus()));
         }
         return saved;

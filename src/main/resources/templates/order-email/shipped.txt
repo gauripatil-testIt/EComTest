@@ -1,0 +1,13 @@
+Your order is on its way, [(${customerName})]!
+
+Order [(${orderId})] has been SHIPPED.
+
+Order ID: [(${orderId})]
+Product: [(${productName})]
+Quantity: [(${quantity})]
+Unit Price: [(${unitPrice})]
+Total: [(${total})]
+[# th:if="${trackingNumber != null}"]Tracking Number: [(${trackingNumber})]
+[/]
+[# th:if="${carrier != null}"]Carrier: [(${carrier})]
+[/]

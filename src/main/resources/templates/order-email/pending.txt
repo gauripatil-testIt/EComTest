@@ -1,0 +1,11 @@
+Thanks for your order, [(${customerName})]!
+
+Your order has been received and is PENDING.
+
+Order ID: [(${orderId})]
+Product: [(${productName})]
+Quantity: [(${quantity})]
+Unit Price: [(${unitPrice})]
+Total: [(${total})]
+
+We'll let you know as soon as your order status changes.

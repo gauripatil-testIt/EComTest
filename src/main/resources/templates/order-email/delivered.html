@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Order Delivered</title>
+</head>
+<body>
+    <h1>Your order has arrived, <span th:text="${customerName}">Customer</span>!</h1>
+    <p>Order <strong th:text="${orderId}">1</strong> has been <strong>delivered</strong>. We hope you enjoy it!</p>
+    <table>
+        <tr><td>Order ID:</td><td th:text="${orderId}">1</td></tr>
+        <tr><td>Product:</td><td th:text="${productName}">Product</td></tr>
+        <tr><td>Quantity:</td><td th:text="${quantity}">1</td></tr>
+        <tr><td>Unit Price:</td><td th:text="${unitPrice}">0.00</td></tr>
+        <tr><td>Total:</td><td th:text="${total}">0.00</td></tr>
+    </table>
+</body>
+</html>

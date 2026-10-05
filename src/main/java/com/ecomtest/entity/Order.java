@@ -39,6 +39,14 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id", nullable = true)
+    private User createdByUser;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "modified_by_user_id", nullable = true)
+    private User modifiedByUser;
+
     public Long getId() {
         return id;
     }
@@ -85,5 +93,21 @@ public class Order {
 
     public void setStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    public User getCreatedByUser() {
+        return createdByUser;
+    }
+
+    public void setCreatedByUser(User createdByUser) {
+        this.createdByUser = createdByUser;
+    }
+
+    public User getModifiedByUser() {
+        return modifiedByUser;
+    }
+
+    public void setModifiedByUser(User modifiedByUser) {
+        this.modifiedByUser = modifiedByUser;
     }
 }

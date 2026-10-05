@@ -78,6 +78,25 @@ public class OrderService {
         orderRepository.delete(order);
     }
 
+    public String exportCsv() {
+        StringBuilder csv = new StringBuilder();
+        csv.append("id,customerName,productId,quantity,unitPrice,status,createdByUserId,modifiedByUserId\n");
+        for (Order order : orderRepository.findAll()) {
+            Long createdByUserId = order.getCreatedBy() != null ? order.getCreatedBy().getId() : null;
+            Long modifiedByUserId = order.getModifiedBy() != null ? order.getModifiedBy().getId() : null;
+            csv.append(order.getId()).append(',')
+                    .append(order.getCustomerName()).append(',')
+                    .append(order.getProduct().getId()).append(',')
+                    .append(order.getQuantity()).append(',')
+                    .append(order.getUnitPrice()).append(',')
+                    .append(order.getStatus()).append(',')
+                    .append(createdByUserId == null ? "" : createdByUserId).append(',')
+                    .append(modifiedByUserId == null ? "" : modifiedByUserId)
+                    .append('\n');
+        }
+        return csv.toString();
+    }
+
     private void applyRequest(Order order, OrderRequest request) {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + request.getProductId()));

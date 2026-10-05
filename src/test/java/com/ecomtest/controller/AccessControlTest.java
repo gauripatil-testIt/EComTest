@@ -9,6 +9,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.ecomtest.entity.Order;
+import com.ecomtest.entity.OrderStatus;
+import com.ecomtest.entity.Product;
+import com.ecomtest.repository.OrderRepository;
+import com.ecomtest.repository.ProductRepository;
+
+import java.math.BigDecimal;
+
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -23,6 +31,12 @@ class AccessControlTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     private String login(String username, String password) throws Exception {
         String payload = """
@@ -173,6 +187,42 @@ class AccessControlTest {
 
         mockMvc.perform(delete("/api/products/{id}", productId)
                         .header(HttpHeaders.AUTHORIZATION, staff))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void staffCannotCreateOrder() throws Exception {
+        String admin = adminAuthHeader();
+        String staff = staffAuthHeader();
+
+        Long productId = createProduct("SKU-ACL-STAFF-CREATE-1", "ACTIVE", admin);
+
+        mockMvc.perform(post("/api/orders")
+                        .header(HttpHeaders.AUTHORIZATION, staff)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(orderPayload(productId)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void customerCannotViewOrderWithNullCreatedBy() throws Exception {
+        String admin = adminAuthHeader();
+        String customer = customerAuthHeader();
+
+        Long productId = createProduct("SKU-ACL-NULL-CREATEDBY-1", "ACTIVE", admin);
+        Product product = productRepository.findById(productId).orElseThrow();
+
+        Order order = new Order();
+        order.setCustomerName("Legacy Customer");
+        order.setProduct(product);
+        order.setQuantity(1);
+        order.setUnitPrice(new BigDecimal("19.99"));
+        order.setStatus(OrderStatus.PENDING);
+        order.setCreatedBy(null);
+        Order saved = orderRepository.save(order);
+
+        mockMvc.perform(get("/api/orders/{id}", saved.getId())
+                        .header(HttpHeaders.AUTHORIZATION, customer))
                 .andExpect(status().isForbidden());
     }
 }

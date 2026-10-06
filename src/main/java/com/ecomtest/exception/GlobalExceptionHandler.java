@@ -19,6 +19,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body(HttpStatus.NOT_FOUND, ex.getMessage()));
     }
 
+    @ExceptionHandler(StockUnavailableException.class)
+    public ResponseEntity<Map<String, Object>> handleStockUnavailable(StockUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body(HttpStatus.CONFLICT, ex.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new LinkedHashMap<>();

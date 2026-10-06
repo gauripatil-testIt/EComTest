@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 import java.math.BigDecimal;
 
@@ -34,6 +35,9 @@ public class Product {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductStatus status;
+
+    @Version
+    private Long version;
 
     public Long getId() {
         return id;
@@ -81,5 +85,13 @@ public class Product {
 
     public void setStatus(ProductStatus status) {
         this.status = status;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

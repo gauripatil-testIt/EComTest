@@ -1,9 +1,13 @@
 package com.ecomtest.dto;
 
 import com.ecomtest.entity.Product;
+import com.ecomtest.entity.ProductImage;
 import com.ecomtest.entity.ProductStatus;
+import com.ecomtest.entity.ProcessingStatus;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.List;
 
 public class ProductResponse {
 
@@ -13,6 +17,7 @@ public class ProductResponse {
     private BigDecimal price;
     private Integer stock;
     private ProductStatus status;
+    private List<ProductImageResponse> images;
 
     public static ProductResponse from(Product product) {
         ProductResponse response = new ProductResponse();
@@ -22,6 +27,17 @@ public class ProductResponse {
         response.price = product.getPrice();
         response.stock = product.getStock();
         response.status = product.getStatus();
+
+        List<ProductImage> productImages = product.getImages();
+        if (productImages == null) {
+            response.images = List.of();
+        } else {
+            response.images = productImages.stream()
+                    .filter(image -> image.getStatus() == ProcessingStatus.READY)
+                    .sorted(Comparator.comparing(ProductImage::getDisplayOrder))
+                    .map(image -> ProductImageResponse.from(image, product.getId()))
+                    .toList();
+        }
         return response;
     }
 
@@ -47,5 +63,9 @@ public class ProductResponse {
 
     public ProductStatus getStatus() {
         return status;
+    }
+
+    public List<ProductImageResponse> getImages() {
+        return images;
     }
 }

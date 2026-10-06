@@ -2,8 +2,12 @@ package com.ecomtest.service;
 
 import com.ecomtest.dto.ProductRequest;
 import com.ecomtest.entity.Product;
+import com.ecomtest.entity.ProductStatus;
+import com.ecomtest.entity.Role;
+import com.ecomtest.entity.User;
 import com.ecomtest.exception.ResourceNotFoundException;
 import com.ecomtest.repository.ProductRepository;
+import com.ecomtest.security.CurrentUserProvider;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +16,11 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CurrentUserProvider currentUserProvider;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, CurrentUserProvider currentUserProvider) {
         this.productRepository = productRepository;
+        this.currentUserProvider = currentUserProvider;
     }
 
     public Product create(ProductRequest request) {
@@ -24,11 +30,20 @@ public class ProductService {
     }
 
     public Product get(Long id) {
-        return productRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + id));
+        if (isCustomer() && product.getStatus() != ProductStatus.ACTIVE) {
+            throw new ResourceNotFoundException("Product not found: " + id);
+        }
+        return product;
     }
 
     public List<Product> list() {
+        if (isCustomer()) {
+            return productRepository.findAll().stream()
+                    .filter(product -> product.getStatus() == ProductStatus.ACTIVE)
+                    .toList();
+        }
         return productRepository.findAll();
     }
 
@@ -49,5 +64,10 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setStock(request.getStock());
         product.setStatus(request.getStatus());
+    }
+
+    private boolean isCustomer() {
+        User currentUser = currentUserProvider.getCurrentUser();
+        return currentUser != null && currentUser.getRole() == Role.CUSTOMER;
     }
 }

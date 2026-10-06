@@ -13,6 +13,8 @@ public class ProductResponse {
     private BigDecimal price;
     private Integer stock;
     private ProductStatus status;
+    private Long createdById;
+    private Long modifiedById;
 
     public static ProductResponse from(Product product) {
         ProductResponse response = new ProductResponse();
@@ -22,6 +24,8 @@ public class ProductResponse {
         response.price = product.getPrice();
         response.stock = product.getStock();
         response.status = product.getStatus();
+        response.createdById = product.getCreatedBy() != null ? product.getCreatedBy().getId() : null;
+        response.modifiedById = product.getModifiedBy() != null ? product.getModifiedBy().getId() : null;
         return response;
     }
 
@@ -47,5 +51,13 @@ public class ProductResponse {
 
     public ProductStatus getStatus() {
         return status;
+    }
+
+    public Long getCreatedById() {
+        return createdById;
+    }
+
+    public Long getModifiedById() {
+        return modifiedById;
     }
 }

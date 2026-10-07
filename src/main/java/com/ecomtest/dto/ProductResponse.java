@@ -13,6 +13,7 @@ public class ProductResponse {
     private BigDecimal price;
     private Integer stock;
     private ProductStatus status;
+    private String description;
 
     public static ProductResponse from(Product product) {
         ProductResponse response = new ProductResponse();
@@ -22,6 +23,7 @@ public class ProductResponse {
         response.price = product.getPrice();
         response.stock = product.getStock();
         response.status = product.getStatus();
+        response.description = product.getDescription();
         return response;
     }
 
@@ -47,5 +49,9 @@ public class ProductResponse {
 
     public ProductStatus getStatus() {
         return status;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

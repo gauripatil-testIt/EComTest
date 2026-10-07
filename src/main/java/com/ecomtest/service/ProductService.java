@@ -49,5 +49,6 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setStock(request.getStock());
         product.setStatus(request.getStatus());
+        product.setDescription(request.getDescription());
     }
 }

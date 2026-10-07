@@ -26,6 +26,8 @@ public class ProductRequest {
     @NotNull
     private ProductStatus status;
 
+    private String description;
+
     public String getName() {
         return name;
     }
@@ -64,5 +66,13 @@ public class ProductRequest {
 
     public void setStatus(ProductStatus status) {
         this.status = status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

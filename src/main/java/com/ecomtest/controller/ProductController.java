@@ -3,6 +3,7 @@ package com.ecomtest.controller;
 import com.ecomtest.dto.ProductRequest;
 import com.ecomtest.dto.ProductResponse;
 import com.ecomtest.entity.Product;
+import com.ecomtest.service.ProductImageService;
 import com.ecomtest.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,9 +24,11 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductImageService productImageService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ProductImageService productImageService) {
         this.productService = productService;
+        this.productImageService = productImageService;
     }
 
     @PostMapping
@@ -36,12 +39,15 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ProductResponse get(@PathVariable Long id) {
-        return ProductResponse.from(productService.get(id));
+        Product product = productService.get(id);
+        return ProductResponse.from(product, productImageService.listImageResponses(product.getId()));
     }
 
     @GetMapping
     public List<ProductResponse> list() {
-        return productService.list().stream().map(ProductResponse::from).toList();
+        return productService.list().stream()
+                .map(product -> ProductResponse.from(product, productImageService.listImageResponses(product.getId())))
+                .toList();
     }
 
     @PutMapping("/{id}")

@@ -49,6 +49,11 @@ public class OrderController {
         return OrderResponse.from(orderService.update(id, request));
     }
 
+    @PostMapping("/{id}/cancel")
+    public OrderResponse cancel(@PathVariable Long id) {
+        return OrderResponse.from(orderService.cancel(id));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         orderService.delete(id);

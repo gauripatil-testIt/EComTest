@@ -13,6 +13,9 @@ public class OrderResponse {
     private Integer quantity;
     private BigDecimal unitPrice;
     private OrderStatus status;
+    private String customerUsername;
+    private String createdByUsername;
+    private String modifiedByUsername;
 
     public static OrderResponse from(Order order) {
         OrderResponse response = new OrderResponse();
@@ -22,6 +25,9 @@ public class OrderResponse {
         response.quantity = order.getQuantity();
         response.unitPrice = order.getUnitPrice();
         response.status = order.getStatus();
+        response.customerUsername = order.getUser() != null ? order.getUser().getUsername() : null;
+        response.createdByUsername = order.getCreatedBy() != null ? order.getCreatedBy().getUsername() : null;
+        response.modifiedByUsername = order.getModifiedBy() != null ? order.getModifiedBy().getUsername() : null;
         return response;
     }
 
@@ -47,5 +53,17 @@ public class OrderResponse {
 
     public OrderStatus getStatus() {
         return status;
+    }
+
+    public String getCustomerUsername() {
+        return customerUsername;
+    }
+
+    public String getCreatedByUsername() {
+        return createdByUsername;
+    }
+
+    public String getModifiedByUsername() {
+        return modifiedByUsername;
     }
 }

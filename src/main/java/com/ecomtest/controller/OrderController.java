@@ -7,6 +7,7 @@ import com.ecomtest.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,27 +29,32 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','CUSTOMER')")
     @PostMapping
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody OrderRequest request) {
         Order order = orderService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(OrderResponse.from(order));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF','CUSTOMER')")
     @GetMapping("/{id}")
     public OrderResponse get(@PathVariable Long id) {
         return OrderResponse.from(orderService.get(id));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF','CUSTOMER')")
     @GetMapping
     public List<OrderResponse> list() {
         return orderService.list().stream().map(OrderResponse::from).toList();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     @PutMapping("/{id}")
     public OrderResponse update(@PathVariable Long id, @Valid @RequestBody OrderRequest request) {
         return OrderResponse.from(orderService.update(id, request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         orderService.delete(id);

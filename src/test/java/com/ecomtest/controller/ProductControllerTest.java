@@ -21,6 +21,21 @@ class ProductControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private String adminToken() throws Exception {
+        String loginPayload = """
+                {
+                  "username": "admin",
+                  "password": "Admin@12345"
+                }
+                """;
+        String response = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginPayload))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readTree(response).get("token").asString();
+    }
+
     private String productPayload(String sku) {
         return """
                 {
@@ -35,7 +50,10 @@ class ProductControllerTest {
 
     @Test
     void createsAndFetchesProduct() throws Exception {
+        String token = adminToken();
+
         String response = mockMvc.perform(post("/api/products")
+                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(productPayload("SKU-CREATE-1")))
                 .andExpect(status().isCreated())
@@ -44,25 +62,33 @@ class ProductControllerTest {
 
         Long id = objectMapper.readTree(response).get("id").asLong();
 
-        mockMvc.perform(get("/api/products/{id}", id))
+        mockMvc.perform(get("/api/products/{id}", id)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Wireless Mouse"));
     }
 
     @Test
     void listsProducts() throws Exception {
+        String token = adminToken();
+
         mockMvc.perform(post("/api/products")
+                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(productPayload("SKU-LIST-1")));
 
-        mockMvc.perform(get("/api/products"))
+        mockMvc.perform(get("/api/products")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
     }
 
     @Test
     void updatesProduct() throws Exception {
+        String token = adminToken();
+
         String created = mockMvc.perform(post("/api/products")
+                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(productPayload("SKU-UPDATE-1")))
                 .andReturn().getResponse().getContentAsString();
@@ -79,6 +105,7 @@ class ProductControllerTest {
                 """;
 
         mockMvc.perform(put("/api/products/{id}", id)
+                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedPayload))
                 .andExpect(status().isOk())
@@ -88,16 +115,21 @@ class ProductControllerTest {
 
     @Test
     void deletesProduct() throws Exception {
+        String token = adminToken();
+
         String created = mockMvc.perform(post("/api/products")
+                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(productPayload("SKU-DELETE-1")))
                 .andReturn().getResponse().getContentAsString();
         Long id = objectMapper.readTree(created).get("id").asLong();
 
-        mockMvc.perform(delete("/api/products/{id}", id))
+        mockMvc.perform(delete("/api/products/{id}", id)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/products/{id}", id))
+        mockMvc.perform(get("/api/products/{id}", id)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound());
     }
 }

@@ -3,10 +3,15 @@ package com.ecomtest.controller;
 import com.ecomtest.dto.OrderRequest;
 import com.ecomtest.dto.OrderResponse;
 import com.ecomtest.entity.Order;
+import com.ecomtest.entity.OrderStatus;
+import com.ecomtest.export.ExportFormat;
+import com.ecomtest.service.OrderExportService;
 import com.ecomtest.service.OrderService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +19,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -23,9 +31,11 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderExportService orderExportService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, OrderExportService orderExportService) {
         this.orderService = orderService;
+        this.orderExportService = orderExportService;
     }
 
     @PostMapping
@@ -40,8 +50,24 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<OrderResponse> list() {
-        return orderService.list().stream().map(OrderResponse::from).toList();
+    public List<OrderResponse> list(@RequestParam(required = false) OrderStatus status) {
+        return orderService.list(status).stream().map(OrderResponse::from).toList();
+    }
+
+    @GetMapping("/export")
+    @PreAuthorize("hasAuthority('EXPORT')")
+    public void export(@RequestParam String format,
+                        @RequestParam(required = false) OrderStatus status,
+                        HttpServletResponse response) throws IOException {
+        ExportFormat exportFormat = ExportFormat.fromParam(format);
+        String extension = exportFormat == ExportFormat.CSV ? "csv" : "xlsx";
+        String contentType = exportFormat == ExportFormat.CSV
+                ? "text/csv"
+                : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        String filename = "orders-export-" + Instant.now().toEpochMilli() + "." + extension;
+        response.setContentType(contentType);
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+        orderExportService.export(status, exportFormat, response.getOutputStream());
     }
 
     @PutMapping("/{id}")

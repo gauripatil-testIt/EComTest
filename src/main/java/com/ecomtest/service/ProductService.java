@@ -2,6 +2,7 @@ package com.ecomtest.service;
 
 import com.ecomtest.dto.ProductRequest;
 import com.ecomtest.entity.Product;
+import com.ecomtest.entity.ProductStatus;
 import com.ecomtest.exception.ResourceNotFoundException;
 import com.ecomtest.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,13 @@ public class ProductService {
 
     public List<Product> list() {
         return productRepository.findAll();
+    }
+
+    public List<Product> list(ProductStatus status) {
+        if (status == null) {
+            return list();
+        }
+        return productRepository.findByStatus(status, org.springframework.data.domain.Pageable.unpaged()).getContent();
     }
 
     public Product update(Long id, ProductRequest request) {

@@ -26,6 +26,7 @@ class OrderControllerTest {
                 {
                   "name": "Wireless Mouse",
                   "sku": "%s",
+                  "description": "A reliable wireless mouse",
                   "price": 19.99,
                   "stock": 100,
                   "status": "ACTIVE"

@@ -15,6 +15,9 @@ public class ProductRequest {
     @NotBlank
     private String sku;
 
+    @NotBlank
+    private String description;
+
     @NotNull
     @PositiveOrZero
     private BigDecimal price;
@@ -40,6 +43,14 @@ public class ProductRequest {
 
     public void setSku(String sku) {
         this.sku = sku;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public BigDecimal getPrice() {

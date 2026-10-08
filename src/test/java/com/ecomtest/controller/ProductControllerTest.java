@@ -26,6 +26,7 @@ class ProductControllerTest {
                 {
                   "name": "Wireless Mouse",
                   "sku": "%s",
+                  "description": "A reliable wireless mouse",
                   "price": 19.99,
                   "stock": 100,
                   "status": "ACTIVE"
@@ -57,7 +58,7 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
     }
 
     @Test
@@ -72,6 +73,7 @@ class ProductControllerTest {
                 {
                   "name": "Wireless Mouse Pro",
                   "sku": "SKU-UPDATE-1",
+                  "description": "An upgraded wireless mouse",
                   "price": 24.99,
                   "stock": 50,
                   "status": "ACTIVE"

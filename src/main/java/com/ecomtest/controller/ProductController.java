@@ -1,10 +1,16 @@
 package com.ecomtest.controller;
 
+import com.ecomtest.dto.ProductFilter;
 import com.ecomtest.dto.ProductRequest;
 import com.ecomtest.dto.ProductResponse;
 import com.ecomtest.entity.Product;
+import com.ecomtest.entity.ProductStatus;
 import com.ecomtest.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,9 +20,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/products")
@@ -40,8 +47,26 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductResponse> list() {
-        return productService.list().stream().map(ProductResponse::from).toList();
+    public Page<ProductResponse> list(@RequestParam(required = false) ProductStatus status,
+                                       @RequestParam(required = false) BigDecimal minPrice,
+                                       @RequestParam(required = false) BigDecimal maxPrice,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "20") int size) {
+        ProductFilter filter = new ProductFilter(status, minPrice, maxPrice);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        return productService.list(filter, pageable).map(ProductResponse::from);
+    }
+
+    @GetMapping("/search")
+    public Page<ProductResponse> search(@RequestParam(required = false) String q,
+                                         @RequestParam(required = false) ProductStatus status,
+                                         @RequestParam(required = false) BigDecimal minPrice,
+                                         @RequestParam(required = false) BigDecimal maxPrice,
+                                         @RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "20") int size) {
+        ProductFilter filter = new ProductFilter(status, minPrice, maxPrice);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        return productService.search(q, filter, pageable).map(ProductResponse::from);
     }
 
     @PutMapping("/{id}")
@@ -55,3 +80,4 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 }
+

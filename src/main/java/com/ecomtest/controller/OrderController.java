@@ -2,9 +2,14 @@ package com.ecomtest.controller;
 
 import com.ecomtest.dto.OrderRequest;
 import com.ecomtest.dto.OrderResponse;
+import com.ecomtest.dto.PageResponse;
 import com.ecomtest.entity.Order;
+import com.ecomtest.entity.OrderStatus;
 import com.ecomtest.service.OrderService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,9 +19,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -40,8 +48,16 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<OrderResponse> list() {
-        return orderService.list().stream().map(OrderResponse::from).toList();
+    public PageResponse<OrderResponse> list(Pageable pageable,
+                                             @RequestParam(required = false) OrderStatus status,
+                                             @RequestParam(required = false) String customerName,
+                                             @RequestParam(required = false) Long productId,
+                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
+        Instant from = dateFrom == null ? null : dateFrom.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant to = dateTo == null ? null : dateTo.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().minusNanos(1);
+        Page<Order> page = orderService.list(pageable, status, customerName, productId, from, to);
+        return PageResponse.from(page, OrderResponse::from);
     }
 
     @PutMapping("/{id}")
@@ -55,3 +71,4 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 }
+

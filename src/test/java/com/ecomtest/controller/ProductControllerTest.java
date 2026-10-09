@@ -57,7 +57,69 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())))
+                .andExpect(jsonPath("$.totalElements").exists())
+                .andExpect(jsonPath("$.page").exists())
+                .andExpect(jsonPath("$.size").exists());
+    }
+
+    @Test
+    void filtersAndPaginatesProducts() throws Exception {
+        mockMvc.perform(post("/api/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                          "name": "Alpha Widget",
+                          "sku": "SKU-FILTER-ALPHA",
+                          "price": 15.00,
+                          "stock": 10,
+                          "status": "ACTIVE"
+                        }
+                        """));
+
+        mockMvc.perform(post("/api/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                          "name": "Beta Widget",
+                          "sku": "SKU-FILTER-BETA",
+                          "price": 5.00,
+                          "stock": 0,
+                          "status": "INACTIVE"
+                        }
+                        """));
+
+        mockMvc.perform(get("/api/products")
+                        .param("status", "ACTIVE")
+                        .param("minPrice", "10")
+                        .param("sort", "name,asc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.sku=='SKU-FILTER-ALPHA')]").exists())
+                .andExpect(jsonPath("$.content[?(@.sku=='SKU-FILTER-BETA')]").doesNotExist());
+
+        mockMvc.perform(get("/api/products")
+                        .param("inStock", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.sku=='SKU-FILTER-BETA')]").doesNotExist());
+
+        mockMvc.perform(get("/api/products")
+                        .param("page", "0")
+                        .param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(1))
+                .andExpect(jsonPath("$.page").value(0));
+
+        mockMvc.perform(get("/api/products")
+                        .param("status", "NOT_A_STATUS"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").isNotEmpty());
+
+        mockMvc.perform(get("/api/products")
+                        .param("status", "ACTIVE")
+                        .param("minPrice", "9999"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.empty()));
     }
 
     @Test

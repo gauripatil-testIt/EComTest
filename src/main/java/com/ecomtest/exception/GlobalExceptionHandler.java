@@ -6,6 +6,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -27,6 +28,16 @@ public class GlobalExceptionHandler {
         }
         Map<String, Object> body = body(HttpStatus.BAD_REQUEST, "Validation failed");
         body.put("fieldErrors", fieldErrors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "the expected type";
+        String message = "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName()
+                + "': expected " + requiredType;
+        Map<String, Object> body = body(HttpStatus.BAD_REQUEST, message);
+        body.put("parameter", ex.getName());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 

@@ -81,7 +81,70 @@ class OrderControllerTest {
 
         mockMvc.perform(get("/api/orders"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())))
+                .andExpect(jsonPath("$.totalElements").exists())
+                .andExpect(jsonPath("$.page").exists())
+                .andExpect(jsonPath("$.size").exists());
+    }
+
+    @Test
+    void filtersAndPaginatesOrders() throws Exception {
+        Long productId = createProduct("SKU-ORD-FILTER-1");
+        Long otherProductId = createProduct("SKU-ORD-FILTER-2");
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                          "customerName": "Jane Doe",
+                          "productId": %d,
+                          "quantity": 1,
+                          "unitPrice": 10.00,
+                          "status": "PENDING"
+                        }
+                        """.formatted(productId)));
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                          "customerName": "John Smith",
+                          "productId": %d,
+                          "quantity": 1,
+                          "unitPrice": 20.00,
+                          "status": "CONFIRMED"
+                        }
+                        """.formatted(otherProductId)));
+
+        mockMvc.perform(get("/api/orders")
+                        .param("customerName", "jane")
+                        .param("status", "PENDING"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.customerName=='Jane Doe')]").exists())
+                .andExpect(jsonPath("$.content[?(@.customerName=='John Smith')]").doesNotExist());
+
+        mockMvc.perform(get("/api/orders")
+                        .param("productId", String.valueOf(productId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.customerName=='John Smith')]").doesNotExist());
+
+        String today = java.time.LocalDate.now().toString();
+        mockMvc.perform(get("/api/orders")
+                        .param("dateFrom", today)
+                        .param("dateTo", today))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+
+        mockMvc.perform(get("/api/orders")
+                        .param("status", "NOT_A_STATUS"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").isNotEmpty());
+
+        mockMvc.perform(get("/api/orders")
+                        .param("customerName", "nobody-matches-this"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.empty()));
     }
 
     @Test

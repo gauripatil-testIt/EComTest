@@ -113,6 +113,34 @@ class OrderControllerTest {
     }
 
     @Test
+    void filtersOrdersByStatus() throws Exception {
+        Long productId = createProduct("SKU-ORD-FILTER-1");
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(orderPayload(productId)));
+
+        String confirmedPayload = """
+                {
+                  "customerName": "John Roe",
+                  "productId": %d,
+                  "quantity": 1,
+                  "unitPrice": 19.99,
+                  "status": "CONFIRMED"
+                }
+                """.formatted(productId);
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(confirmedPayload));
+
+        mockMvc.perform(get("/api/orders").param("status", "CONFIRMED"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].customerName", org.hamcrest.Matchers.hasItem("John Roe")))
+                .andExpect(jsonPath("$[*].customerName", org.hamcrest.Matchers.not(org.hamcrest.Matchers.hasItem("Jane Doe"))))
+                .andExpect(jsonPath("$[*].status", org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is("CONFIRMED"))));
+    }
+
+    @Test
     void deletesOrder() throws Exception {
         Long productId = createProduct("SKU-ORD-DELETE-1");
 

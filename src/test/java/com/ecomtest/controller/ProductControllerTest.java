@@ -87,6 +87,32 @@ class ProductControllerTest {
     }
 
     @Test
+    void filtersProductsByStatus() throws Exception {
+        mockMvc.perform(post("/api/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(productPayload("SKU-FILTER-ACTIVE-1")));
+
+        String discontinuedPayload = """
+                {
+                  "name": "Wireless Mouse",
+                  "sku": "SKU-FILTER-DISCONTINUED-1",
+                  "price": 19.99,
+                  "stock": 100,
+                  "status": "DISCONTINUED"
+                }
+                """;
+        mockMvc.perform(post("/api/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(discontinuedPayload));
+
+        mockMvc.perform(get("/api/products").param("status", "DISCONTINUED"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].sku", org.hamcrest.Matchers.hasItem("SKU-FILTER-DISCONTINUED-1")))
+                .andExpect(jsonPath("$[*].sku", org.hamcrest.Matchers.not(org.hamcrest.Matchers.hasItem("SKU-FILTER-ACTIVE-1"))))
+                .andExpect(jsonPath("$[*].status", org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is("DISCONTINUED"))));
+    }
+
+    @Test
     void deletesProduct() throws Exception {
         String created = mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)

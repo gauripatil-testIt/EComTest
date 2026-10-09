@@ -2,13 +2,18 @@ package com.ecomtest.service;
 
 import com.ecomtest.dto.OrderRequest;
 import com.ecomtest.entity.Order;
+import com.ecomtest.entity.OrderStatus;
 import com.ecomtest.entity.Product;
 import com.ecomtest.exception.ResourceNotFoundException;
 import com.ecomtest.repository.OrderRepository;
 import com.ecomtest.repository.ProductRepository;
+import com.ecomtest.specification.OrderSpecifications;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.Instant;
 
 @Service
 public class OrderService {
@@ -32,8 +37,9 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + id));
     }
 
-    public List<Order> list() {
-        return orderRepository.findAll();
+    public Page<Order> list(OrderStatus status, String customerName, Long productId, Instant dateFrom, Instant dateTo, Pageable pageable) {
+        Specification<Order> spec = OrderSpecifications.withFilters(status, customerName, productId, dateFrom, dateTo);
+        return orderRepository.findAll(spec, pageable);
     }
 
     public Order update(Long id, OrderRequest request) {
@@ -57,3 +63,4 @@ public class OrderService {
         order.setStatus(request.getStatus());
     }
 }
+

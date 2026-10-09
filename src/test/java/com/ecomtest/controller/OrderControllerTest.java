@@ -81,7 +81,79 @@ class OrderControllerTest {
 
         mockMvc.perform(get("/api/orders"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+    }
+
+    @Test
+    void filtersOrdersByStatus() throws Exception {
+        Long productId = createProduct("SKU-ORD-STATUS-1");
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(orderPayload(productId)));
+
+        mockMvc.perform(get("/api/orders").param("status", "PENDING"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].status", org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is("PENDING"))));
+    }
+
+    @Test
+    void filtersOrdersByCustomerNamePartialMatch() throws Exception {
+        Long productId = createProduct("SKU-ORD-CUST-1");
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(orderPayload(productId)));
+
+        mockMvc.perform(get("/api/orders").param("customerName", "jane"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+    }
+
+    @Test
+    void filtersOrdersByProductId() throws Exception {
+        Long productId = createProduct("SKU-ORD-PRODUCTID-1");
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(orderPayload(productId)));
+
+        mockMvc.perform(get("/api/orders").param("productId", String.valueOf(productId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].productId", org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is(productId.intValue()))));
+    }
+
+    @Test
+    void filtersOrdersByDateRange() throws Exception {
+        Long productId = createProduct("SKU-ORD-DATE-1");
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(orderPayload(productId)));
+
+        java.time.Instant from = java.time.Instant.now().minusSeconds(3600);
+        java.time.Instant to = java.time.Instant.now().plusSeconds(3600);
+
+        mockMvc.perform(get("/api/orders")
+                        .param("dateFrom", from.toString())
+                        .param("dateTo", to.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+    }
+
+    @Test
+    void rejectsUnknownOrderStatusFilter() throws Exception {
+        mockMvc.perform(get("/api/orders").param("status", "NOT_A_STATUS"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void returnsEmptyContentWhenNoOrdersMatch() throws Exception {
+        mockMvc.perform(get("/api/orders").param("customerName", "no-such-customer-xyz"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.empty()));
     }
 
     @Test

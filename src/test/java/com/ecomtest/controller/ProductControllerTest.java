@@ -57,7 +57,53 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.not(org.hamcrest.Matchers.empty())));
+    }
+
+    @Test
+    void filtersProductsByStatusMinPriceAndSortsByName() throws Exception {
+        mockMvc.perform(post("/api/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(productPayload("SKU-FILTER-1")));
+
+        mockMvc.perform(get("/api/products")
+                        .param("status", "ACTIVE")
+                        .param("minPrice", "10")
+                        .param("sort", "name,asc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].status", org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is("ACTIVE"))));
+    }
+
+    @Test
+    void filtersProductsByInStock() throws Exception {
+        mockMvc.perform(post("/api/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(productPayload("SKU-INSTOCK-1")));
+
+        mockMvc.perform(get("/api/products").param("inStock", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].stock", org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.greaterThan(0))));
+    }
+
+    @Test
+    void rejectsUnknownProductStatusFilter() throws Exception {
+        mockMvc.perform(get("/api/products").param("status", "NOT_A_STATUS"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void rejectsNonNumericMinPriceFilter() throws Exception {
+        mockMvc.perform(get("/api/products").param("minPrice", "abc"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void returnsEmptyContentWhenNoProductsMatch() throws Exception {
+        mockMvc.perform(get("/api/products").param("minPrice", "999999"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", org.hamcrest.Matchers.empty()));
     }
 
     @Test

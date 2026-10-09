@@ -2,11 +2,16 @@ package com.ecomtest.service;
 
 import com.ecomtest.dto.ProductRequest;
 import com.ecomtest.entity.Product;
+import com.ecomtest.entity.ProductStatus;
 import com.ecomtest.exception.ResourceNotFoundException;
 import com.ecomtest.repository.ProductRepository;
+import com.ecomtest.specification.ProductSpecifications;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @Service
 public class ProductService {
@@ -28,8 +33,9 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + id));
     }
 
-    public List<Product> list() {
-        return productRepository.findAll();
+    public Page<Product> list(ProductStatus status, BigDecimal minPrice, BigDecimal maxPrice, Boolean inStock, Pageable pageable) {
+        Specification<Product> spec = ProductSpecifications.withFilters(status, minPrice, maxPrice, inStock);
+        return productRepository.findAll(spec, pageable);
     }
 
     public Product update(Long id, ProductRequest request) {
@@ -51,3 +57,4 @@ public class ProductService {
         product.setStatus(request.getStatus());
     }
 }
+

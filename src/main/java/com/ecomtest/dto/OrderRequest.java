@@ -13,6 +13,8 @@ public class OrderRequest {
     @NotBlank
     private String customerName;
 
+    private Long customerId;
+
     @NotNull
     private Long productId;
 
@@ -33,6 +35,14 @@ public class OrderRequest {
 
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
     }
 
     public Long getProductId() {

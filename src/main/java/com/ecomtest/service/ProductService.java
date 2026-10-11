@@ -2,8 +2,14 @@ package com.ecomtest.service;
 
 import com.ecomtest.dto.ProductRequest;
 import com.ecomtest.entity.Product;
+import com.ecomtest.entity.ProductStatus;
+import com.ecomtest.entity.Role;
+import com.ecomtest.entity.User;
 import com.ecomtest.exception.ResourceNotFoundException;
 import com.ecomtest.repository.ProductRepository;
+import com.ecomtest.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +18,11 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, UserRepository userRepository) {
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
     }
 
     public Product create(ProductRequest request) {
@@ -24,12 +32,25 @@ public class ProductService {
     }
 
     public Product get(Long id) {
-        return productRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + id));
+        User currentUser = currentUser();
+        if (currentUser != null && currentUser.getRole() == Role.CUSTOMER
+                && product.getStatus() != ProductStatus.ACTIVE) {
+            throw new ResourceNotFoundException("Product not found: " + id);
+        }
+        return product;
     }
 
     public List<Product> list() {
-        return productRepository.findAll();
+        List<Product> products = productRepository.findAll();
+        User currentUser = currentUser();
+        if (currentUser != null && currentUser.getRole() == Role.CUSTOMER) {
+            return products.stream()
+                    .filter(product -> product.getStatus() == ProductStatus.ACTIVE)
+                    .toList();
+        }
+        return products;
     }
 
     public Product update(Long id, ProductRequest request) {
@@ -44,10 +65,27 @@ public class ProductService {
     }
 
     private void applyRequest(Product product, ProductRequest request) {
+        boolean isNew = product.getId() == null;
         product.setName(request.getName());
         product.setSku(request.getSku());
         product.setPrice(request.getPrice());
         product.setStock(request.getStock());
         product.setStatus(request.getStatus());
+
+        User currentUser = currentUser();
+        if (isNew) {
+            product.setCreatedBy(currentUser);
+        }
+        product.setModifiedBy(currentUser);
+    }
+
+    private User currentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            return null;
+        }
+        return userRepository.findByEmail(authentication.getName()).orElse(null);
     }
 }
+
+

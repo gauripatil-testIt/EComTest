@@ -4,9 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
@@ -34,6 +37,14 @@ public class Product {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = true)
+    private User createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "modified_by", nullable = true)
+    private User modifiedBy;
 
     public Long getId() {
         return id;
@@ -81,5 +92,21 @@ public class Product {
 
     public void setStatus(ProductStatus status) {
         this.status = status;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public User getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(User modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 }

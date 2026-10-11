@@ -29,29 +29,35 @@ public class OrderController {
     }
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN','CUSTOMER')")
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody OrderRequest request) {
         Order order = orderService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(OrderResponse.from(order));
     }
 
     @GetMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
     public OrderResponse get(@PathVariable Long id) {
         return OrderResponse.from(orderService.get(id));
     }
 
     @GetMapping
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
     public List<OrderResponse> list() {
         return orderService.list().stream().map(OrderResponse::from).toList();
     }
 
     @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     public OrderResponse update(@PathVariable Long id, @Valid @RequestBody OrderRequest request) {
         return OrderResponse.from(orderService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         orderService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
+

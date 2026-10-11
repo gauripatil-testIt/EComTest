@@ -4,6 +4,7 @@ import com.ecomtest.entity.Order;
 import com.ecomtest.entity.OrderStatus;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 public class OrderResponse {
 
@@ -13,6 +14,10 @@ public class OrderResponse {
     private Integer quantity;
     private BigDecimal unitPrice;
     private OrderStatus status;
+    private String createdBy;
+    private String modifiedBy;
+    private Instant createdAt;
+    private Instant modifiedAt;
 
     public static OrderResponse from(Order order) {
         OrderResponse response = new OrderResponse();
@@ -22,6 +27,10 @@ public class OrderResponse {
         response.quantity = order.getQuantity();
         response.unitPrice = order.getUnitPrice();
         response.status = order.getStatus();
+        response.createdBy = order.getCreatedBy();
+        response.modifiedBy = order.getModifiedBy();
+        response.createdAt = order.getCreatedAt();
+        response.modifiedAt = order.getModifiedAt();
         return response;
     }
 
@@ -47,5 +56,21 @@ public class OrderResponse {
 
     public OrderStatus getStatus() {
         return status;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getModifiedAt() {
+        return modifiedAt;
     }
 }

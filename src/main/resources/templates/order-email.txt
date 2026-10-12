@@ -1,0 +1,24 @@
+[[${#strings.equals(status, 'PENDING')} ? 'ORDER CONFIRMATION' : (${#strings.equals(status, 'CONFIRMED')} ? 'ORDER CONFIRMED' : (${#strings.equals(status, 'SHIPPED')} ? 'ORDER SHIPPED' : (${#strings.equals(status, 'DELIVERED')} ? 'ORDER DELIVERED' : (${#strings.equals(status, 'CANCELLED')} ? 'ORDER CANCELLED' : 'ORDER UPDATE'))))]]
+
+Hello [[${customerName}]],
+
+[# th:switch="${status}"]
+[# th:case="'PENDING'"]Thank you for your order! We have received it and it is now pending processing.[/]
+[# th:case="'CONFIRMED'"]Good news - your order has been confirmed and is being prepared.[/]
+[# th:case="'SHIPPED'"]Your order is on its way![/]
+[# th:case="'DELIVERED'"]Your order has been delivered. We hope you enjoy your purchase![/]
+[# th:case="'CANCELLED'"]Your order has been cancelled. If you have questions, please contact support.[/]
+[# th:case="*"]There has been an update to your order.[/]
+[/]
+
+[# th:if="${status == T(com.ecomtest.entity.OrderStatus).SHIPPED}"]
+[# th:if="${trackingNumber != null}"]Tracking number: [[${trackingNumber}]][/]
+[# th:unless="${trackingNumber != null}"]Tracking not available.[/]
+[/]
+
+Order Details
+-------------
+Order ID: [[${orderId}]]
+Product: [[${productName}]]
+Quantity: [[${quantity}]]
+Total: [[${total}]]

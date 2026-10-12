@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Order Update</title>
+</head>
+<body>
+    <h1 th:switch="${status}">
+        <span th:case="'PENDING'">Order Confirmation</span>
+        <span th:case="'CONFIRMED'">Your Order Has Been Confirmed</span>
+        <span th:case="'SHIPPED'">Your Order Has Shipped</span>
+        <span th:case="'DELIVERED'">Your Order Has Been Delivered</span>
+        <span th:case="'CANCELLED'">Your Order Has Been Cancelled</span>
+        <span th:case="*">Order Update</span>
+    </h1>
+
+    <p>Hello <span th:text="${customerName}">Customer</span>,</p>
+
+    <div th:switch="${status}">
+        <p th:case="'PENDING'">Thank you for your order! We have received it and it is now pending processing.</p>
+        <p th:case="'CONFIRMED'">Good news - your order has been confirmed and is being prepared.</p>
+        <p th:case="'SHIPPED'">Your order is on its way!</p>
+        <p th:case="'DELIVERED'">Your order has been delivered. We hope you enjoy your purchase!</p>
+        <p th:case="'CANCELLED'">Your order has been cancelled. If you have questions, please contact support.</p>
+        <p th:case="*">There has been an update to your order.</p>
+    </div>
+
+    <div th:if="${status == T(com.ecomtest.entity.OrderStatus).SHIPPED}">
+        <p th:if="${trackingNumber != null}">
+            Tracking number: <span th:text="${trackingNumber}">TRACK123</span>
+        </p>
+        <p th:if="${trackingNumber == null}">Tracking not available.</p>
+    </div>
+
+    <h2>Order Details</h2>
+    <ul>
+        <li>Order ID: <span th:text="${orderId}">0</span></li>
+        <li>Product: <span th:text="${productName}">Product</span></li>
+        <li>Quantity: <span th:text="${quantity}">1</span></li>
+        <li>Total: <span th:text="${total}">0.00</span></li>
+    </ul>
+</body>
+</html>

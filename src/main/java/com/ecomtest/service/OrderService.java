@@ -2,6 +2,7 @@ package com.ecomtest.service;
 
 import com.ecomtest.dto.OrderRequest;
 import com.ecomtest.entity.Order;
+import com.ecomtest.entity.OrderStatus;
 import com.ecomtest.entity.Product;
 import com.ecomtest.exception.ResourceNotFoundException;
 import com.ecomtest.repository.OrderRepository;
@@ -15,16 +16,21 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final OrderEmailDispatcher orderEmailDispatcher;
 
-    public OrderService(OrderRepository orderRepository, ProductRepository productRepository) {
+    public OrderService(OrderRepository orderRepository, ProductRepository productRepository,
+                         OrderEmailDispatcher orderEmailDispatcher) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.orderEmailDispatcher = orderEmailDispatcher;
     }
 
     public Order create(OrderRequest request) {
         Order order = new Order();
         applyRequest(order, request);
-        return orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+        orderEmailDispatcher.dispatch(saved, saved.getStatus());
+        return saved;
     }
 
     public Order get(Long id) {
@@ -38,8 +44,13 @@ public class OrderService {
 
     public Order update(Long id, OrderRequest request) {
         Order order = get(id);
+        OrderStatus previousStatus = order.getStatus();
         applyRequest(order, request);
-        return orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+        if (saved.getStatus() != previousStatus) {
+            orderEmailDispatcher.dispatch(saved, saved.getStatus());
+        }
+        return saved;
     }
 
     public void delete(Long id) {

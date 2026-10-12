@@ -2,8 +2,12 @@ package com.ecomtest.service;
 
 import com.ecomtest.dto.ProductRequest;
 import com.ecomtest.entity.Product;
+import com.ecomtest.entity.ProductStatus;
 import com.ecomtest.exception.ResourceNotFoundException;
 import com.ecomtest.repository.ProductRepository;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,12 +28,20 @@ public class ProductService {
     }
 
     public Product get(Long id) {
-        return productRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + id));
+        if (isCustomer() && product.getStatus() != ProductStatus.ACTIVE) {
+            throw new AccessDeniedException("Not permitted to access this product");
+        }
+        return product;
     }
 
     public List<Product> list() {
-        return productRepository.findAll();
+        List<Product> products = productRepository.findAll();
+        if (isCustomer()) {
+            return products.stream().filter(product -> product.getStatus() == ProductStatus.ACTIVE).toList();
+        }
+        return products;
     }
 
     public Product update(Long id, ProductRequest request) {
@@ -49,5 +61,15 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setStock(request.getStock());
         product.setStatus(request.getStatus());
+    }
+
+    private boolean isCustomer() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_CUSTOMER"));
     }
 }

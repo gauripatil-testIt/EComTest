@@ -6,6 +6,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -28,6 +29,17 @@ public class GlobalExceptionHandler {
         Map<String, Object> body = body(HttpStatus.BAD_REQUEST, "Validation failed");
         body.put("fieldErrors", fieldErrors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(ImageUploadException.class)
+    public ResponseEntity<Map<String, Object>> handleImageUpload(ImageUploadException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body(HttpStatus.BAD_REQUEST, ex.getMessage()));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE)
+                .body(body(HttpStatus.CONTENT_TOO_LARGE, "The uploaded file is too large; maximum size is 5MB"));
     }
 
     private Map<String, Object> body(HttpStatus status, String message) {

@@ -1,0 +1,5 @@
+[# th:if="${status == 'PENDING'}"]Order Confirmation - Order #[(${orderId})][/#]
+[# th:if="${status == 'CONFIRMED'}"]Your Order #[(${orderId})] is Confirmed[/#]
+[# th:if="${status == 'SHIPPED'}"]Your Order #[(${orderId})] Has Shipped[/#]
+[# th:if="${status == 'DELIVERED'}"]Your Order #[(${orderId})] Has Been Delivered[/#]
+[# th:if="${status == 'CANCELLED'}"]Your Order #[(${orderId})] Has Been Cancelled[/#]

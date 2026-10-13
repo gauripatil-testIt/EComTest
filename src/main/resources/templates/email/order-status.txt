@@ -1,0 +1,16 @@
+Hello [(${customerName})],
+
+[# th:if="${status == 'PENDING'}"]Thank you for your order! Your order has been received and is pending confirmation.[/#]
+[# th:if="${status == 'CONFIRMED'}"]Great news - your order has been confirmed and is being prepared.[/#]
+[# th:if="${status == 'SHIPPED'}"]Your order is on its way!
+[# th:if="${trackingNumber != null}"]Tracking Number: [(${trackingNumber})][/#]
+[# th:if="${trackingUrl != null}"]Track your shipment: [(${trackingUrl})][/#][/#]
+[# th:if="${status == 'DELIVERED'}"]Your order has been delivered. We hope you enjoy it![/#]
+[# th:if="${status == 'CANCELLED'}"]Your order has been cancelled.[/#]
+
+Order Details
+-------------
+Order ID: [(${orderId})]
+Product: [(${productName})]
+Quantity: [(${quantity})]
+Total: [(${total})]

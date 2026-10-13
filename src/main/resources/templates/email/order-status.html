@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${'Order #' + orderId}">Order Update</title>
+</head>
+<body>
+    <p th:text="${'Hello ' + customerName + ','}">Hello,</p>
+
+    <div th:if="${status == 'PENDING'}">
+        <p>Thank you for your order! Your order has been received and is pending confirmation.</p>
+    </div>
+    <div th:if="${status == 'CONFIRMED'}">
+        <p>Great news - your order has been confirmed and is being prepared.</p>
+    </div>
+    <div th:if="${status == 'SHIPPED'}">
+        <p>Your order is on its way!</p>
+        <div th:if="${trackingNumber != null}">
+            <p th:text="${'Tracking Number: ' + trackingNumber}">Tracking Number:</p>
+        </div>
+        <div th:if="${trackingUrl != null}">
+            <p>Track your shipment: <a th:href="${trackingUrl}" th:text="${trackingUrl}">tracking link</a></p>
+        </div>
+    </div>
+    <div th:if="${status == 'DELIVERED'}">
+        <p>Your order has been delivered. We hope you enjoy it!</p>
+    </div>
+    <div th:if="${status == 'CANCELLED'}">
+        <p>Your order has been cancelled.</p>
+    </div>
+
+    <h3>Order Details</h3>
+    <table>
+        <tr>
+            <td>Order ID:</td>
+            <td th:text="${orderId}">1</td>
+        </tr>
+        <tr>
+            <td>Product:</td>
+            <td th:text="${productName}">Product</td>
+        </tr>
+        <tr>
+            <td>Quantity:</td>
+            <td th:text="${quantity}">1</td>
+        </tr>
+        <tr>
+            <td>Total:</td>
+            <td th:text="${total}">0.00</td>
+        </tr>
+    </table>
+</body>
+</html>

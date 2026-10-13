@@ -1,6 +1,7 @@
 package com.ecomtest.dto;
 
 import com.ecomtest.entity.OrderStatus;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -26,6 +27,13 @@ public class OrderRequest {
 
     @NotNull
     private OrderStatus status;
+
+    @Email
+    private String customerEmail;
+
+    private String trackingNumber;
+
+    private String trackingUrl;
 
     public String getCustomerName() {
         return customerName;
@@ -65,5 +73,29 @@ public class OrderRequest {
 
     public void setStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
+    }
+
+    public String getTrackingNumber() {
+        return trackingNumber;
+    }
+
+    public void setTrackingNumber(String trackingNumber) {
+        this.trackingNumber = trackingNumber;
+    }
+
+    public String getTrackingUrl() {
+        return trackingUrl;
+    }
+
+    public void setTrackingUrl(String trackingUrl) {
+        this.trackingUrl = trackingUrl;
     }
 }

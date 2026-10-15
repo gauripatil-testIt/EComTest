@@ -25,6 +25,9 @@ public class Product {
     @Column(nullable = false, unique = true)
     private String sku;
 
+    @Column
+    private String description;
+
     @Column(nullable = false)
     private BigDecimal price;
 
@@ -57,6 +60,14 @@ public class Product {
 
     public void setSku(String sku) {
         this.sku = sku;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public BigDecimal getPrice() {

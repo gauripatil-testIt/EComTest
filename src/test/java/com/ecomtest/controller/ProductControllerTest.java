@@ -50,6 +50,26 @@ class ProductControllerTest {
     }
 
     @Test
+    void createsProductWithDescription() throws Exception {
+        String payload = """
+                {
+                  "name": "Mechanical Keyboard",
+                  "sku": "SKU-DESC-1",
+                  "price": 89.99,
+                  "stock": 25,
+                  "status": "ACTIVE",
+                  "description": "A compact mechanical keyboard"
+                }
+                """;
+
+        mockMvc.perform(post("/api/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.description").value("A compact mechanical keyboard"));
+    }
+
+    @Test
     void listsProducts() throws Exception {
         mockMvc.perform(post("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)

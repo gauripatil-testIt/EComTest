@@ -2,8 +2,12 @@ package com.ecomtest.service;
 
 import com.ecomtest.dto.ProductRequest;
 import com.ecomtest.entity.Product;
+import com.ecomtest.entity.ProductStatus;
+import com.ecomtest.entity.User;
+import com.ecomtest.entity.UserRole;
 import com.ecomtest.exception.ResourceNotFoundException;
 import com.ecomtest.repository.ProductRepository;
+import com.ecomtest.security.CurrentUserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,29 +16,43 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CurrentUserService currentUserService;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository,
+                          CurrentUserService currentUserService) {
         this.productRepository = productRepository;
+        this.currentUserService = currentUserService;
     }
 
     public Product create(ProductRequest request) {
         Product product = new Product();
         applyRequest(product, request);
+        product.setCreatedBy(currentUserService.username());
         return productRepository.save(product);
     }
 
     public Product get(Long id) {
-        return productRepository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + id));
+        User currentUser = currentUserService.currentUser();
+        if (currentUser.getRole() == UserRole.CUSTOMER && product.getStatus() != ProductStatus.ACTIVE) {
+            throw new ResourceNotFoundException("Product not found: " + id);
+        }
+        return product;
     }
 
     public List<Product> list() {
+        User currentUser = currentUserService.currentUser();
+        if (currentUser.getRole() == UserRole.CUSTOMER) {
+            return productRepository.findByStatus(ProductStatus.ACTIVE);
+        }
         return productRepository.findAll();
     }
 
     public Product update(Long id, ProductRequest request) {
         Product product = get(id);
         applyRequest(product, request);
+        product.setModifiedBy(currentUserService.username());
         return productRepository.save(product);
     }
 

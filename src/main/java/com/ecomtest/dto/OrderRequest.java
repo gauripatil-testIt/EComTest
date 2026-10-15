@@ -1,7 +1,6 @@
 package com.ecomtest.dto;
 
 import com.ecomtest.entity.OrderStatus;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -9,9 +8,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 
 public class OrderRequest {
-
-    @NotBlank
-    private String customerName;
 
     @NotNull
     private Long productId;
@@ -26,14 +22,6 @@ public class OrderRequest {
 
     @NotNull
     private OrderStatus status;
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
 
     public Long getProductId() {
         return productId;
